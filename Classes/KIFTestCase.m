@@ -16,16 +16,12 @@
 
 
 @implementation KIFTestCase
-{
-    NSException *_stoppingException;
-}
 
 NSComparisonResult selectorSort(NSInvocation *invocOne, NSInvocation *invocTwo, void *reverse);
 
 + (id)defaultTestSuite
 {
     if (self == [KIFTestCase class]) {
-                NSLog(@"hDP");
         // Don't run KIFTestCase "tests"
         return nil;
     }
@@ -39,12 +35,10 @@ NSComparisonResult selectorSort(NSInvocation *invocOne, NSInvocation *invocTwo, 
     if (!self) {
         return nil;
     }
-
+    
 #ifndef KIF_SENTEST
-            NSLog(@"Blah");
     self.continueAfterFailure = NO;
 #else
-            NSLog(@"Raise after failure");
     [self raiseAfterFailure];
 #endif
     return self;
@@ -71,29 +65,45 @@ NSComparisonResult selectorSort(NSInvocation *invocOne, NSInvocation *invocTwo, 
     return newArray;
 }
 
+- (void)setUp;
+{
+    [self beforeEach];
+}
+
+- (void)tearDown;
+{
+    [self afterEach];
+}
+
 + (void)setUp
 {
-    [self performSetupTearDownWithSelector:@selector(beforeAll)];
+    [[self new] beforeAll];
 }
 
 + (void)tearDown
 {
-    [self performSetupTearDownWithSelector:@selector(afterAll)];
-}
-
-+ (void)performSetupTearDownWithSelector:(SEL)selector
-{
-    KIFTestCase *testCase = [self testCaseWithSelector:selector];
-    XCTestCaseRun *run = [XCTestCaseRun testRunWithTest:testCase];
-    [testCase performTest:run];
-    
-    if (testCase->_stoppingException) {
-        NSLog(@"Por levantar exceptions");
-        [testCase->_stoppingException raise];
-    }
+    [[self new] afterAll];
 }
 
 #else
+
+- (void)setUp;
+{
+    [super setUp];
+    
+    if ([self isNotBeforeOrAfter]) {
+        [self beforeEach];
+    }
+}
+
+- (void)tearDown;
+{
+    if ([self isNotBeforeOrAfter]) {
+        [self afterEach];
+    }
+    
+    [super tearDown];
+}
 
 + (NSArray *)testInvocations;
 {
@@ -118,37 +128,18 @@ NSComparisonResult selectorSort(NSInvocation *invocOne, NSInvocation *invocTwo, 
     return testInvocations;
 }
 
-#endif
-
-- (void)setUp;
-{
-    [super setUp];
-    
-    if ([self isNotBeforeOrAfter]) {
-        [self beforeEach];
-    }
-}
-
-- (void)tearDown;
-{
-    if ([self isNotBeforeOrAfter]) {
-        [self afterEach];
-    }
-    
-    [super tearDown];
-}
-
 - (BOOL)isNotBeforeOrAfter;
 {
     SEL selector = self.invocation.selector;
     return selector != @selector(beforeAll) && selector != @selector(afterAll);
 }
 
+#endif
+
 - (void)failWithException:(NSException *)exception stopTest:(BOOL)stop
 {
     if (stop) {
         [self writeScreenshotForException:exception];
-        _stoppingException = exception;
     }
     
     if (stop && self.stopTestsOnFirstBigFailure) {
@@ -167,10 +158,8 @@ NSComparisonResult selectorSort(NSInvocation *invocOne, NSInvocation *invocTwo, 
 - (void)writeScreenshotForException:(NSException *)exception;
 {
 #ifndef KIF_SENTEST
-            NSLog(@"1");
     [[UIApplication sharedApplication] writeScreenshotForLine:[exception.userInfo[@"SenTestLineNumberKey"] unsignedIntegerValue] inFile:exception.userInfo[@"SenTestFilenameKey"] description:nil error:NULL];
 #else
-            NSLog(@"2");
     [[UIApplication sharedApplication] writeScreenshotForLine:exception.lineNumber.unsignedIntegerValue inFile:exception.filename description:nil error:NULL];
 #endif
 }
