@@ -31,7 +31,7 @@ static inline void Swizzle(Class c, SEL orig, SEL new)
 - (void)failWithException:(NSException *)exception stopTest:(BOOL)stop
 {
     self.continueAfterFailure = YES;
-    
+        NSLog(@"HDP··1111222");
     [self recordFailureWithDescription:exception.description inFile:exception.userInfo[@"SenTestFilenameKey"] atLine:[exception.userInfo[@"SenTestLineNumberKey"] unsignedIntegerValue] expected:NO];
     
     if (stop) {
@@ -44,7 +44,7 @@ static inline void Swizzle(Class c, SEL orig, SEL new)
 }
 
 - (void)failWithExceptions:(NSArray *)exceptions stopTest:(BOOL)stop
-{
+{    NSLog(@"HDP·123123·");
     NSException *lastException = exceptions.lastObject;
     for (NSException *exception in exceptions) {
         [self failWithException:exception stopTest:(exception == lastException ? stop : NO)];
@@ -53,6 +53,7 @@ static inline void Swizzle(Class c, SEL orig, SEL new)
 
 - (void)KIF_recordUnexpectedFailureWithDescription:(id)arg1 exception:(NSException *)arg2
 {
+        NSLog(@"HDP··1234123412341234");
     if (![[arg2 name] isEqualToString:@"KIFFailureException"]) {
         [self KIF_recordUnexpectedFailureWithDescription:arg1 exception:arg2];
     }
@@ -69,15 +70,21 @@ static inline void Swizzle(Class c, SEL orig, SEL new)
 @implementation XCTestSuite (KIFAdditions)
 
 + (void)load
+
+
 {
+    NSLog(@"HDP··54564567");
     Swizzle([XCTestSuite class], @selector(_recordUnexpectedFailureForTestRun:description:exception:), @selector(KIF_recordUnexpectedFailureForTestRun:description:exception:));
 }
 
 - (void)KIF_recordUnexpectedFailureForTestRun:(XCTestSuiteRun *)arg1 description:(id)arg2 exception:(NSException *)arg3
 {
+    NSLog(@"HDP··");
     if (![[arg3 name] isEqualToString:@"KIFFailureException"]) {
+            NSLog(@"HDP··1");
         [self KIF_recordUnexpectedFailureForTestRun:arg1 description:arg2 exception:arg3];
     } else {
+            NSLog(@"HDP··2");
         [arg1 recordFailureWithDescription:[NSString stringWithFormat:@"Test suite stopped on fatal error: %@", arg3.description] inFile:arg3.userInfo[@"SenTestFilenameKey"] atLine:[arg3.userInfo[@"SenTestLineNumberKey"] unsignedIntegerValue] expected:NO];
     }
 }
