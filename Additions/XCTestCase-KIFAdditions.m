@@ -82,6 +82,8 @@ static inline void Swizzle(Class c, SEL orig, SEL new)
     NSLog(@"HDP··");
     if (![[arg3 name] isEqualToString:@"KIFFailureException"]) {
             NSLog(@"HDP··1");
+        NSLog(@"arg2 %@",arg2);
+        NSLog(@"arg3 %@",arg3);
         [self KIF_recordUnexpectedFailureForTestRun:arg1 description:arg2 exception:arg3];
     } else {
             NSLog(@"HDP··2");
